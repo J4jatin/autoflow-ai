@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  # ── AutoFlow AI API ──────────────────────────────────────────────────────
+  autoflow-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: autoflow-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - autoflow-net
+
+  # ── LocalStack (mock AWS) ────────────────────────────────────────────────
+  localstack:
+    image: localstack/localstack:3.4
+    container_name: autoflow-localstack
+    ports:
+      - "4566:4566" # LocalStack gateway (all AWS services)
+    environment:
+      - SERVICES=lambda,apigateway,s3,iam,logs,cloudformation,ssm
+      - DEBUG=0
+      - LAMBDA_EXECUTOR=docker
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - localstack-data:/var/lib/localstack
+    networks:
+      - autoflow-net
+
+networks:
+  autoflow-net:
+    driver: bridge
+
+volumes:
+  localstack-data:
