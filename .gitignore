@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+app/pipeline/model.joblib
+app/pipeline/scaler.joblib
+cdk.out/
+node_modules/
+.localstack/
